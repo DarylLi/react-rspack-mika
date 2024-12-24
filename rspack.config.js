@@ -4,8 +4,10 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const terserPlugin = require("terser-webpack-plugin");
 const rspack = require("@rspack/core");
 const { defineConfig } = require("@rspack/cli");
-
-const webpack = require("webpack");
+// cargo build --target=wasm32-unknown-unknown
+// cargo build --release --target wasm32-unknown-unknown --package pose_solver
+// wasm-bindgen target/wasm32-unknownwasm-bindgen target/wasm32-unknown-unknown/release/pose_solver.wasm --out-dir output --target web
+// const webpack = require("webpack");
 const config = defineConfig({
   mode: "development",
   // entry: [path.join(__dirname,'/src/main.js'),path.join(__dirname,'/src/extra.js'),path.join(__dirname,'/src/haha.js')],
@@ -17,6 +19,8 @@ const config = defineConfig({
     filename: "[name].bundle.js",
     libraryTarget: "umd",
     library: "[name]_kuroMi",
+    hotUpdateChunkFilename: "[id].[fullhash].hot-update.js",
+    hotUpdateMainFilename: "[runtime].[fullhash].hot-update.json",
   },
   module: {
     rules: [
@@ -60,27 +64,29 @@ const config = defineConfig({
         },
       },
       {
-        test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+        test: /\.(png|jpe?g|gif|svg|mp4|vpd|vmd)(\?.*)?$/,
         loader: "url-loader",
         options: {
           limit: 10000,
           name: "img/[name].[hash:7].[ext]",
         },
       },
-      {
-        test: path.resolve(__dirname, "node_modules/webpack-dev-server/client"),
-        loader: "null-loader",
-      },
     ],
   },
   devServer: {
-    open: true,
     port: "9000",
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Cross-Origin-Embedder-Policy": "require-corp",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "*",
+    },
     allowedHosts: [
       "host.com",
       "subdomain.host.com",
       "subdomain2.host.com",
       "host2.com",
+      "daryl.cn",
     ],
   },
   plugins: [
@@ -111,6 +117,7 @@ const config = defineConfig({
       "@utils": path.resolve(__dirname, "src/utils/"),
       "@server": path.resolve(__dirname, "server/"),
       "@pkg": path.resolve(__dirname, "pkg/"),
+      "@extra": path.resolve(__dirname, "extra/"),
     },
   },
 });
